@@ -8,6 +8,7 @@
 #define GAME_HEIGHT	720					//ゲーム画面の高さ（ハイト）
 #define GAME_COLOR	32					//ゲームの色域
 
+#define GAME_ICON_ID	333					//ゲームのICONのID
 
 // プログラムは WinMain から始まります
 //Windowsのプログラム方法（WinAPI）で動いている
@@ -16,11 +17,11 @@
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	ChangeWindowMode(TRUE);					//ウィンドウモードに設定
-	SetMainWindowText("お先まっくら");	//ウィンドウのタイトルの文字
+	SetMainWindowText("ゲームタイトル");	//ウィンドウのタイトルの文字
 	SetGraphMode(GAME_WIDTH, GAME_HEIGHT, GAME_COLOR);	//ウィンドウの解像度を設定
 	SetWindowSize(GAME_WIDTH, GAME_HEIGHT);		//ウィンドウのの大きさを設定
 	SetBackgroundColor(255, 255,255);			//デフォルトの背景色
-	
+	SetWindowIconID(GAME_ICON_ID);				//アイコンファイルを読み込み
 
 	// ＤＸライブラリ初期化処理
 	if (DxLib_Init() == -1)		
