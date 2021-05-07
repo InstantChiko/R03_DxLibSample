@@ -4,8 +4,8 @@
 
 //マクロ定義
 #define GAME_TITLE	"ゲームタイトル"	//ゲームタイトル（お先まっくら）
-#define GAME_WIDTH	860				//ゲーム画面の幅（ウィドス）
-#define GAME_HEIGHT	720				//ゲーム画面の高さ（ハイト）
+#define GAME_WIDTH	1280				//ゲーム画面の幅（ウィドス）
+#define GAME_HEIGHT	720					//ゲーム画面の高さ（ハイト）
 #define GAME_COLOR	32					//ゲームの色域
 
 #define GAME_ICON_ID	333				//ゲームのICONのID
@@ -46,7 +46,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int XSpeed = Speed;
 	int YSpeed = Speed;
 
-//円の半径を決める
+	//円の半径を決める
 	int radius = 50;
 
 	//四角の大きさを決める
@@ -77,14 +77,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		//	GetColor(255, 255, 0),	//色を取得
 		//	TRUE					//塗りつぶし？
 		//);
+		
+		//円を描画
 		DrawCircle(X, Y, radius,
 			GetColor(0, 255, 0),
 			FALSE, 5
 		);
-
-		
-
-
+	
+		//円を右下に移動させる
 		X += XSpeed;//四角の位置を右にずらす
 	
 		Y += YSpeed;//四角の位置を下にずらす
@@ -100,24 +100,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			YSpeed = -YSpeed; //移動する向きを反転
 			if (YSpeed > 0) { YSpeed += 1; }
 			else if (YSpeed < 0) { YSpeed -= 1; }
-
-			
 		}
-
-
 	//四角を移動
 			
 			ScreenFlip();		//ダブルバッファリングした画面を描画
 			
 			}
-			
-			
-		
-	
-
-	
-
 	// ＤＸライブラリ使用の終了処理
 	DxLib_End();
+
 	return 0;				// ソフトの終了 
 }
