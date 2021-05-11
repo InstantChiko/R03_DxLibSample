@@ -1,6 +1,7 @@
 //ヘッダーファイルの読み込み
 #include "DxLib.h"	//DxLibを使う時は必要
-#include <stdio.h>
+
+#include "keyboard.h"	//キーボードの処理
 
 //マクロ定義
 #define GAME_TITLE	"ゲームタイトル"	//ゲームタイトル（ゲームタイトル）
@@ -40,15 +41,43 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//ダブルバッファリングを有効化
 	SetDrawScreen(DX_SCREEN_BACK);
 
+	//円の中心点
+	int X = GAME_WIDTH / 2;
+	int Y = GAME_WIDTH / 2;
+
+	//円の半径
+	int radius = 50;
+
 	//無限ループ
 	while (1)
 	{
 		//メッセージを受け取り続ける
 		if (ProcessMessage() != 0) { break; }	//-1のとき、エラーやウィンドウが閉じられた
-		if (ClearDrawScreen() != 0) { break; }//画面を消去する
+		if (ClearDrawScreen() != 0) { break; }	//画面を消去する
+
+		//キーボード入力の更新
+		AllKeyUpdate();
+
+		//キー入力
+		if (KeyDown(KEY_INPUT_W) == TRUE)
+		{
+			Y--;		//上に移動
+		}
+		if (KeyDown(KEY_INPUT_S) == TRUE)
+		{
+			Y++;	//下に移動
+		}
+		if(KeyDown(KEY_INPUT_A) == TRUE)
+		{ 
+			X--;		//左に移動
+		}
+		if(KeyDown(KEY_INPUT_D) == TRUE)
+		{ 
+			X++;		//左に移動
+		}
 
 
-
+		DrawCircle(X, Y, radius, GetColor(255, 255, 0), TRUE);
 
 		ScreenFlip();		//ダブルバッファリングした画面を描画
 
