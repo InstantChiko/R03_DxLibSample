@@ -13,6 +13,41 @@
 
 #define GAME_WINDOW_BAR 0				//ウィンドウバーの種類
 
+//列挙型
+enum GAME_SCENE
+{
+	GAME_SCENE_TITLE,
+	GAME_SCENE_PLAY,
+	GAME_SCENE_END,
+	GAME_SCENE_CHANGE
+};//ゲームのシーン
+
+//シーンを管理する変数
+GAME_SCENE GameScene;	//現在のゲームシーン
+GAME_SCENE OldGameScene;	//前回のゲームシーン
+GAME_SCENE NextGameScene;	//次のゲームシーン
+
+//画面の切り替え
+BOOL IsFadeOut = FALSE;		//フェードアウト
+BOOL IsFadeIn = FALSE;		//フェードイン
+
+//プロトタイプ宣言
+VOID Title(VOID);			//タイトル画面
+VOID TitleProc(VOID);		//タイトル画面（処理）
+VOID TitleDraw(VOID);		//タイトル画面（描画）
+
+VOID Play(VOID);			//プレイ画面
+VOID PlayProc(VOID);		//プレイ画面（処理）
+VOID PlayDraw(VOID);		//プレイ画面（描画）
+
+VOID End(VOID);			//エンド画面
+VOID EndProc(VOID);		//エンド画面（処理）
+VOID EndDraw(VOID);		//エンド画面（描画）
+
+VOID Change(VOID);			//タイトル画面
+VOID ChangeProc(VOID);		//タイトル画面（処理）
+VOID ChangeDraw(VOID);		//タイトル画面（描画）
+
 // プログラムは WinMain から始まります
 //Windowsのプログラム方法（WinAPI）で動いている
 //DxLibは、DirectXという、ゲームプログラミングを簡単に使える仕組み
@@ -48,6 +83,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//円の半径
 	int radius = 50;
 
+	//最初のシーンは、タイトル画面から
+	GameScene = GAME_SCENE_TITLE;
+
 	//無限ループ
 	while (1)
 	{
@@ -57,6 +95,35 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		//キーボード入力の更新
 		AllKeyUpdate();
+
+		//ESCキーで強制終了
+		if (KeyClick(KEY_INPUT_ESCAPE) == TRUE) { break; }
+
+
+		//以前のシーンを取得
+		if (GameScene != GAME_SCENE_CHANGE)
+		{
+			OldGameScene = GameScene;
+		}
+
+		//シーンごとに処理を行う
+		switch (GameScene)
+		{
+		case GAME_SCENE_TITLE:
+			Title();		//タイトル画面
+			break;
+		case GAME_SCENE_PLAY:
+			Play();		//プレイ画面
+			break;
+		case GAME_SCENE_END:
+			End();		//エンド画面
+			break;
+		case GAME_SCENE_CHANGE:
+			Change();		//切り替え画面
+			break;
+		default:
+			break;
+		}
 
 		//キー入力
 		if (KeyDown(KEY_INPUT_W) == TRUE)
@@ -84,5 +151,124 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 
 	DxLib_End();		// ＤＸライブラリ使用の終了処理
+
 	return 0;				// ソフトの終了 
+}
+
+/// <summary>
+/// タイトル画面
+/// </summary>
+VOID Title(VOID)
+{
+	TitleProc();		//処理
+	TitleDraw();		//描画
+
+	return;
+}
+/// <summary>
+/// タイトル画面の処理
+/// </summary>
+/// <param name=""></param>
+VOID TitleProc(VOID)
+{
+	return;
+}
+
+/// <summary>
+/// タイトル画面の描画
+/// </summary>
+/// <param name=""></param>
+VOID TitleDraw(VOID)
+{
+		DrawString(0, 0, "タイトル画面", GetColor(0, 0, 0));
+	return;
+}
+
+/// <summary>
+/// プレイ画面
+/// </summary>
+VOID Play(VOID)
+{
+	PlayProc();		//処理
+	PlayDraw();		//描画
+
+	return;
+}
+/// <summary>
+/// プレイ画面の処理
+/// </summary>
+/// <param name=""></param>
+VOID PlayProc(VOID)
+{
+	return;
+}
+
+/// <summary>
+/// プレイ画面の描画
+/// </summary>
+/// <param name=""></param>
+VOID PlayDraw(VOID)
+{
+	DrawString(0, 0, "プレイ画面", GetColor(0, 0, 0));
+	return;
+}
+
+
+
+/// <summary>
+/// エンド画面
+/// </summary>
+VOID End(VOID)
+{
+	EndProc();		//処理
+	EndDraw();		//描画
+
+	return;
+}
+/// <summary>
+/// エンド画面の処理
+/// </summary>
+/// <param name=""></param>
+VOID EndProc(VOID)
+{
+	DrawString(0, 0, "エンド画面", GetColor(0, 0, 0));
+	return;
+}
+
+/// <summary>
+/// エンド画面の描画
+/// </summary>
+/// <param name=""></param>
+VOID EndDraw(VOID)
+{
+	return;
+}
+
+/// <summary>
+/// 切り替え画面
+/// </summary>
+VOID Change(VOID)
+{
+	ChangeProc();		//処理
+	ChangeDraw();		//描画
+
+	return;
+}
+/// <summary>
+/// 切り替え画面の処理
+/// </summary>
+/// <param name=""></param>
+VOID ChangeProc(VOID)
+{
+	DrawString(0, 0, "切り替え画面", GetColor(0, 0, 0));
+	return;
+}
+
+/// <summary>
+/// 切り替え画面の描画
+/// </summary>
+/// <param name=""></param>
+VOID ChangeDraw(VOID)
+{
+	return;
 }
