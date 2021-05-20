@@ -122,8 +122,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{
 			OldGameScene = GameScene;
 		}
-
 		//シーンごとに処理を行う
+
 		switch (GameScene)
 		{
 		case GAME_SCENE_TITLE:
@@ -154,25 +154,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 
 		//キー入力
-		if (KeyDown(KEY_INPUT_W) == TRUE)
+		if (KeyDown(KEY_INPUT_W) == TRUE)		//WのところをUPにすると矢印キーで操作できる
 		{
 			Y--;		//上に移動
 		}
-		if (KeyDown(KEY_INPUT_S) == TRUE)
+		if (KeyDown(KEY_INPUT_S) == TRUE)		//SのところをDOWNにすると矢印キーで操作できる
 		{
 			Y++;	//下に移動
 		}
-		if (KeyDown(KEY_INPUT_A) == TRUE)
+		if (KeyDown(KEY_INPUT_A) == TRUE)		//AのところをLEFTにすると矢印キーで操作できる
 		{
 			X--;		//左に移動
 		}
-		if (KeyDown(KEY_INPUT_D) == TRUE)
+		if (KeyDown(KEY_INPUT_D) == TRUE)		//DのところをRIGHTにすると矢印キーで操作できる
 		{
 			X++;		//左に移動
 		}
 
 
-		DrawCircle(X, Y, radius, GetColor(255, 255, 0), TRUE);
+		DrawCircle(X, Y, radius, GetColor(255, 255, 0), TRUE);		//RGBの値を入れる（黄色）
 
 		ScreenFlip();		//ダブルバッファリングした画面を描画
 
