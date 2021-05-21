@@ -1,6 +1,6 @@
 //ヘッダーファイルの読み込み
 #include "DxLib.h"	//DxLibを使う時は必要
-
+#include "FPS.h"
 #include "keyboard.h"	//キーボードの処理
 
 //マクロ定義
@@ -113,6 +113,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		//キーボード入力の更新
 		AllKeyUpdate();
 
+		//FPS値を更新
+		FPSUpdate();
+
 		//ESCキーで強制終了
 		if (KeyClick(KEY_INPUT_ESCAPE) == TRUE) { break; }
 
@@ -173,6 +176,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 
 		DrawCircle(X, Y, radius, GetColor(255, 255, 0), TRUE);		//RGBの値を入れる（黄色）
+
+		//FPS値を描画
+		FPSDraw();
+
+		//FPS値を待つ
+		FPSWait();
 
 		ScreenFlip();		//ダブルバッファリングした画面を描画
 
