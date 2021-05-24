@@ -14,7 +14,7 @@ struct CHARACTOR
 	int width;			//幅	
 	int height;			//高さ
 
-	int speed = 1;		//移動速度
+	int speed = 50;		//移動速度
 
 	RECT coll;			//当たり判定の領域（四角）
 	BOOL IsDraw = FALSE;//画像が描画できる？
@@ -67,6 +67,8 @@ VOID ChangeDraw(VOID);		//タイトル画面（描画）
 
 VOID ChangeScene(GAME_SCENE sece);	//シーン切り替え
 
+VOID CollUpdate(CHARACTOR* chara);	//当たり判定の領域を更新
+
 // プログラムは WinMain から始まります
 //Windowsのプログラム方法（WinAPI）で動いている
 //DxLibは、DirectXという、ゲームプログラミングを簡単に使える仕組み
@@ -118,6 +120,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 	//画像の幅と高さを取得
 	GetGraphSize(player.handle, &player.width, &player.height);
+
+	//当たり判定を更新する
+	CollUpdate(&player);	//プレイヤーの当たり判定のアドレス
 
 	//プレイヤーを初期化
 	player.x = GAME_WIDTH / 2 - player.width / 2;	//中央寄せ
@@ -274,6 +279,29 @@ VOID PlayProc(VOID)
 		//エンド画面に切り替え
 		ChangeScene(GAME_SCENE_END);
 	}
+	//プレイヤーの操作
+
+	if (KeyDown(KEY_INPUT_UP) == TRUE)
+	{
+		player.y -= player.speed ;
+	}
+	if (KeyDown(KEY_INPUT_DOWN) == TRUE)
+	{
+		player.y += player.speed ;
+	}
+	if (KeyDown(KEY_INPUT_LEFT) == TRUE)
+	{
+		player.x -= player.speed ;
+	}
+	if (KeyDown(KEY_INPUT_RIGHT) == TRUE)
+	{
+		player.x += player.speed ;
+	}
+	
+
+	//当たり判定を更新する
+	CollUpdate(&player);
+
 	return;
 }
 
@@ -288,6 +316,14 @@ VOID PlayDraw(VOID)
 	{
 		//画像を描画
 		DrawGraph(player.x, player.y, player.handle, TRUE);
+
+		//デバッグの時は、当たり判定の領域を描画
+		if (GAME_DEBUG == TRUE)
+		{
+			//四角を描画
+			DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom,
+				GetColor(255, 0, 0), FALSE);
+		}
 	}
 
 	DrawString(0, 0, "プレイ画面", GetColor(0, 0, 0));
@@ -431,5 +467,19 @@ VOID ChangeDraw(VOID)
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 	DrawString(0, 0, "切り替え画面", GetColor(255, 0, 0));
+	return;
+}
+
+/// <summary>
+/// 当たり判定の領域更新
+/// </summary>
+/// <param name="Coll">当たり判定の領域</param>
+VOID CollUpdate(CHARACTOR* chara)
+{
+	chara->coll.left = chara->x +20;							 //当たり判定の微調整
+	chara->coll.top = chara->y  ;							 //当たり判定の微調整
+	chara->coll.right= chara->x + chara->width -20 ;			 //当たり判定の微調整
+	chara->coll.bottom = chara->y + chara->height ;			 //当たり判定の微調整
+
 	return;
 }
