@@ -21,6 +21,7 @@ struct CHARACTOR
 };
 
 
+
 //グローバル変数
 //シーンを管理する変数
 GAME_SCENE GameScene;	//現在のゲームシーン
@@ -72,6 +73,8 @@ VOID ChangeScene(GAME_SCENE sece);	//シーン切り替え
 
 VOID CollUpdatePlayer(CHARACTOR* chara);	//当たり判定
 VOID CollUpdate(CHARACTOR* chara);	//当たり判定
+
+BOOL OnCollRect(RECT a, RECT b);		//矩形と矩形の当たり判定
 
 // プログラムは WinMain から始まります
 //Windowsのプログラム方法（WinAPI）で動いている
@@ -125,15 +128,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//画像の幅と高さを取得
 	GetGraphSize(player.handle, &player.width, &player.height);
 
-	//当たり判定を更新する
+	/*当たり判定を更新する
 	CollUpdatePlayer(&player);	//プレイヤーの当たり判定のアドレス
-
+	*/
 	//プレイヤーを初期化
 	player.x = GAME_WIDTH / 2 - player.width / 2;	//中央寄せ
 	player.y = GAME_HEIGHT / 2 - player.height / 2;	//中央寄せ
 	player.speed = 500;		//スピード
 
 	player.IsDraw = TRUE;	//描画できる！
+
+	//当たり判定を更新する
+	CollUpdatePlayer(&player);	//プレイヤーの当たり判定のアドレス
 
 	//ゴールの画像を読み込み
 	strcatDx(goal.path, ".\\image\\goal.png");	//パスのコピー
@@ -151,18 +157,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		DxLib_End();		//強制終了
 		return -1;			//エラー処理
 	}
+	
 	//画像の幅と高さを取得
 	GetGraphSize(goal.handle, &goal.width, &goal.height);
-
-	//当たり判定を更新する
-	CollUpdate(&goal);	//ゴールの当たり判定のアドレス
-
+	
 	//ゴールを初期化
 	goal.x = GAME_WIDTH - goal.width;	//中央寄せ
 	goal.y = 0;	//中央寄せ
 	goal.speed = 500;		//スピード
-
 	goal.IsDraw = TRUE;	//描画できる！
+
+	//当たり判定を更新する
+	CollUpdate(&goal);	//ゴールの当たり判定のアドレス
 
 	//無限ループ
 	while (1)
@@ -306,7 +312,7 @@ VOID Play(VOID)
 /// <param name=""></param>
 VOID PlayProc(VOID)
 {
-	if (KeyClick(KEY_INPUT_RETURN) == TRUE)
+	/*if (KeyClick(KEY_INPUT_RETURN) == TRUE)
 	{
 		//シーンの切り替え
 		//次のシーンの初期化をここで行うと楽
@@ -314,28 +320,40 @@ VOID PlayProc(VOID)
 		//エンド画面に切り替え
 		ChangeScene(GAME_SCENE_END);
 	}
+	*/
+	
 	//プレイヤーの操作
 
-	if (KeyDown(KEY_INPUT_UP) == TRUE)
+	if (KeyDown(KEY_INPUT_W) == TRUE)				//「W」のところがUPだと矢印キー
 	{
 		player.y -= player.speed * fps.DeltaTime;
 	}
-	if (KeyDown(KEY_INPUT_DOWN) == TRUE)
+	if (KeyDown(KEY_INPUT_S) == TRUE)				//「S」のところがDOWNだと矢印キー
 	{
 		player.y += player.speed * fps.DeltaTime;
 	}
-	if (KeyDown(KEY_INPUT_LEFT) == TRUE)
+	if (KeyDown(KEY_INPUT_A) == TRUE)				//「A」のところがLEFTだと矢印キー
 	{
 		player.x -= player.speed * fps.DeltaTime;
 	}
-	if (KeyDown(KEY_INPUT_RIGHT) == TRUE)
+	if (KeyDown(KEY_INPUT_D) == TRUE)				//「D」のところがRIGHTだと矢印キー	
 	{
 		player.x += player.speed * fps.DeltaTime;
 	}
-	
 
 	//当たり判定を更新する
 	CollUpdatePlayer(&player);
+
+	//ゴールの当たり判定を更新する
+	CollUpdate(&goal);
+
+	//プレイヤーがゴールに当たった時は
+	if (OnCollRect(player.coll, goal.coll) == TRUE)
+	{
+		//エンド画面に切り替え
+		ChangeScene(GAME_SCENE_END);
+		return;				//処理終了
+	}
 
 	return;
 }
@@ -547,4 +565,28 @@ VOID CollUpdate(CHARACTOR* chara)
 	chara->coll.bottom = chara->y + chara->height ;			 //当たり判定の微調整
 
 	return;
+}
+
+/// <summary>
+/// 矩形と矩形の当たり判定
+/// </summary>
+/// <param name="a">矩形A</param>
+/// <param name="b">矩形B</param>
+/// <returns>当たったらTRUE/当たらなかったらFALSE</returns>
+BOOL OnCollRect(RECT a, RECT b)
+{
+	if (
+		 a.left < b.right&&		//矩形Aの左辺X座標　＜　矩形Ｂの右辺X座標　かつ
+		 a.right > b.left&&		//矩形Aの右辺X座標　＜　矩形Ｂの左辺X座標　かつ
+		 a.top < b.bottom&&		//矩形Aの上辺Y座標　＜　矩形Ｂの下辺Y座標　かつ
+		 a.bottom > b.top		//矩形Aの下辺Y座標　＜　矩形Ｂの上辺Y座標　
+		)
+	{
+		//当たっているとき
+		return TRUE;
+	}
+	else {
+		//当たっていないとき
+		return FALSE;
+	}
 }
