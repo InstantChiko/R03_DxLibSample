@@ -20,6 +20,19 @@ struct CHARACTOR
 	BOOL IsDraw = FALSE;//画像が描画できる？
 };
 
+//動画の構造体
+struct MOVIE
+{
+	int handle = -1;		//動画のハンドル
+	char path[255];			//動画のパス
+	int x;					//X位置
+	int y;					//Y位置
+	int width;				//幅
+	int height;				//高さ
+
+	int Volume = 255;		//ボリューム（最小)0～255(最大)
+};
+
 
 
 //グローバル変数
@@ -27,6 +40,9 @@ struct CHARACTOR
 GAME_SCENE GameScene;	//現在のゲームシーン
 GAME_SCENE OldGameScene;	//前回のゲームシーン
 GAME_SCENE NextGameScene;	//次のゲームシーン
+
+//プレイ背景の動画
+MOVIE playMovie;
 
 //プレイヤー
 CHARACTOR player;
@@ -109,6 +125,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	//ゲーム全体の初期化
 	
+	//プレイ動画の背景を読み込み
+	strcpyDx(playMovie.path, ".\\Movie\\PlayMovie.mp4");	//パスのコピー
+		playMovie.handle = LoadBlendGraph(playMovie.path);	//動画の読み込み
+
+		if (playMovie.handle == -1)
+		{
+			MessageBox(
+				GetMainWindowHandle(),	//メインのウィンドウハンドル
+				playMovie.path,			//メッセージの本文
+				"動画読み込みエラー！",//メッセージのタイトル
+				MB_OK				//ボタン
+			);
+
+			DxLib_End();		//強制終了
+			return -1;			//エラー処理
+		}
+
+		//画像の幅と高さを取得
+		GetGraphSize(player.handle, &player.width, &player.height);
+
+		//動画のボリューム
+		playMovie.Volume = 255;	
+
 	//プレイヤーの画像を読み込み
 	strcatDx(player.path, ".\\image\\player2.png");	//パスのコピー
 	player.handle = LoadGraph(player.path);	//画像の読み込み
@@ -235,8 +274,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	//終わるときの処理
-	DeleteGraph(player.handle);	//画像をメモリ上から削除
-	DeleteGraph(goal.handle);	//画像をメモリ上から削除
+	DeleteGraph(playMovie.handle);	//動画をメモリ上から削除
+	DeleteGraph(player.handle);		//画像をメモリ上から削除
+	DeleteGraph(goal.handle);		//画像をメモリ上から削除
 
 	DxLib_End();		// ＤＸライブラリ使用の終了処理
 
@@ -364,6 +404,19 @@ VOID PlayProc(VOID)
 /// <param name=""></param>
 VOID PlayDraw(VOID)
 {
+
+	//背景動画を描画
+
+	//もし動画が再生されていないとき
+	if (GetMovieStateToGraph(playMovie.handle) == 0)
+	{
+		//再生する
+		SeekMovieToGraph(playMovie.handle, 0);		//シークバーを最初に戻す
+		PlayMovieToGraph(playMovie.handle);			//動画を再生
+	}
+	//動画を描画（画面に合わせて画像を引き伸ばす）
+	DrawExtendGraph(0, 0, GAME_WIDTH, GAME_HEIGHT, playMovie.handle, TRUE);
+
 	//プレイヤーを描画
 	if (player.IsDraw == TRUE)
 	{
@@ -545,10 +598,10 @@ VOID ChangeDraw(VOID)
 /// <param name="Coll">当たり判定の領域</param>
 VOID CollUpdatePlayer(CHARACTOR* chara)
 {
-	chara->coll.left = chara->x + 20;							 //当たり判定の微調整
-	chara->coll.top = chara->y;							 //当たり判定の微調整
-	chara->coll.right = chara->x + chara->width - 20;			 //当たり判定の微調整
-	chara->coll.bottom = chara->y + chara->height;			 //当たり判定の微調整
+	chara->coll.left = chara->x + 30;							 //当たり判定の微調整
+	chara->coll.top = chara->y + 40;							 //当たり判定の微調整
+	chara->coll.right = chara->x + chara->width -50;			 //当たり判定の微調整
+	chara->coll.bottom = chara->y + chara->height - 40;			 //当たり判定の微調整
 
 	return;
 }
