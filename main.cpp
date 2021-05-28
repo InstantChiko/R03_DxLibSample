@@ -612,10 +612,10 @@ VOID CollUpdatePlayer(CHARACTOR* chara)
 /// <param name="Coll">“–‚½‚è”»’è‚Ì—Ìˆæ</param>
 VOID CollUpdate(CHARACTOR* chara)
 {
-	chara->coll.left = chara->x ;							 //“–‚½‚è”»’è‚Ì”÷’²®
-	chara->coll.top = chara->y  ;							 //“–‚½‚è”»’è‚Ì”÷’²®
-	chara->coll.right= chara->x + chara->width ;			 //“–‚½‚è”»’è‚Ì”÷’²®
-	chara->coll.bottom = chara->y + chara->height ;			 //“–‚½‚è”»’è‚Ì”÷’²®
+	chara->coll.left = chara->x + 50;							 //“–‚½‚è”»’è‚Ì”÷’²®
+	chara->coll.top = chara->y  + 40;							 //“–‚½‚è”»’è‚Ì”÷’²®
+	chara->coll.right= chara->x + chara->width -40;			 //“–‚½‚è”»’è‚Ì”÷’²®
+	chara->coll.bottom = chara->y + chara->height -40;			 //“–‚½‚è”»’è‚Ì”÷’²®
 
 	return;
 }
