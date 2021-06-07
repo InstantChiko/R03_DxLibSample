@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 
 //ヘッダファイル読み込み
 #include "game.h"		//ゲーム全体のヘッダファイル
@@ -37,6 +38,16 @@ struct MOVIE
 	int Volume = 255;	//ボリューム(最小)0～255(最大)　
 };
 
+//音楽の構造体
+struct AUDIO
+{
+	int handle = -1;		//音楽のハンドル
+	char path[255];			//音楽のパス
+
+	int Volume = -1;		//ボリューム（MIN ０　～　２５５MAX）
+	int playType = -1;		// BGM or SE
+};
+
 //グローバル変数
 //シーンを管理する変数
 GAME_SCENE GameScene;		//現在のゲームのシーン
@@ -51,6 +62,11 @@ CHARACTOR player;
 
 //ゴール
 CHARACTOR Goal;
+
+//音楽
+AUDIO TitleBGM;
+AUDIO PlayBGM;
+AUDIO EndBGM;
 
 //画面の切り替え
 BOOL IsFadeOut = FALSE;		//フェードアウト
@@ -207,6 +223,11 @@ int WINAPI WinMain(
 	DeleteGraph(player.handle);		//画像をメモリ上から削除
 	DeleteGraph(Goal.handle);		//画像をメモリ上から削除
 
+		//終わるときの処理
+	DeleteSoundMem(TitleBGM.handle);	//動画をメモリ上から削除
+	DeleteSoundMem(PlayBGM.handle);		//画像をメモリ上から削除
+	DeleteSoundMem(EndBGM.handle);		//画像をメモリ上から削除
+
 	//ＤＸライブラリ使用の終了処理
 	DxLib_End();
 
@@ -289,7 +310,77 @@ BOOL GameLoad(VOID)
 	//画像の幅と高さを取得
 	GetGraphSize(Goal.handle, &Goal.width, &Goal.height);
 
+	/// <summary>
+	/// タイトル音楽をメモリに読み込み
+	/// </summary>
+	/// <param name="audio">Audio構造体変数のアドレス</param>
+	/// <param name="path">Audioの音楽パス</param>
+	/// <param name="volume">ボリューム</param>
+	/// <param name="playType">DX_PLAYTYPE_LOOP or DX_PLAYTYPE_BACK</param>
+	/// <returns></returns>
 
+		//title音楽の読み込み
+		strcpyDx(TitleBGM.path, ".\\Audio\\opening.mp3");	//パスのコピー
+		TitleBGM.handle = LoadSoundMem(TitleBGM.path);	//音楽の読み込み
+
+		if (TitleBGM.handle == -1)
+		{
+			MessageBox(
+				GetMainWindowHandle(),	//メインのウィンドウハンドル
+				TitleBGM.path,				//メッセージ本文
+				"音楽読み込みエラー！",		//メッセージタイトル
+				MB_OK					//ボタン
+			);
+
+			return FALSE;	//読み込み失敗
+		}
+
+		TitleBGM.playType = DX_PLAYTYPE_LOOP;	 //音楽をループさせる
+		TitleBGM.Volume = 255;					 //MAXが２５５
+
+		return TRUE;	//全て読み込みた！
+	
+
+		//play音楽の読み込み
+		strcpyDx(PlayBGM.path, ".\\Audio\\plaing.mp3");	//パスのコピー
+		PlayBGM.handle = LoadSoundMem(PlayBGM.path);	//音楽の読み込み
+
+		if (PlayBGM.handle == -1)
+		{
+			MessageBox(
+				GetMainWindowHandle(),	//メインのウィンドウハンドル
+				PlayBGM.path,				//メッセージ本文
+				"音楽読み込みエラー！",		//メッセージタイトル
+				MB_OK					//ボタン
+			);
+
+			return FALSE;	//読み込み失敗
+		}
+
+		PlayBGM.playType = DX_PLAYTYPE_LOOP;	 //音楽をループさせる
+		PlayBGM.Volume = 255;					 //MAXが２５５
+
+		return TRUE;	//全て読み込みた！
+
+
+	//end音楽の読み込み
+	strcpyDx(EndBGM.path, ".\\Audio\\ending.mp3");	//パスのコピー
+	EndBGM.handle = LoadSoundMem(EndBGM.path);	//音楽の読み込み
+
+	if (EndBGM.handle == -1)
+	{
+		MessageBox(
+			GetMainWindowHandle(),	//メインのウィンドウハンドル
+			EndBGM.path,				//メッセージ本文
+			"音楽読み込みエラー！",		//メッセージタイトル
+			MB_OK					//ボタン
+		);
+
+		return FALSE;	//読み込み失敗
+	}
+
+	EndBGM.playType = DX_PLAYTYPE_LOOP;	 //音楽をループさせる
+	EndBGM.Volume = 255;					 //MAXが２５５
 
 	return TRUE;	//全て読み込みた！
 }
@@ -352,6 +443,9 @@ VOID TitleProc(VOID)
 
 	if (KeyClick(KEY_INPUT_RETURN) == TRUE)
 	{
+		//BGMを止める
+		 StopSoundMem(TitleBGM.handle);
+
 		//シーン切り替え
 		//次のシーンの初期化をここで行うと楽
 
@@ -360,6 +454,15 @@ VOID TitleProc(VOID)
 
 		//プレイ画面に切り替え
 		ChangeScene(GAME_SCENE_PLAY);
+
+		return;
+	}
+
+	//BGMが流れていないとき
+	if (CheckSoundMem(TitleBGM.handle) == 0)
+	{
+		//BGMを流す
+		PlaySoundMem(TitleBGM.handle, TitleBGM.playType);
 	}
 
 	return;
@@ -402,6 +505,13 @@ VOID PlayProc(VOID)
 	}
 	*/
 
+	//BGMが流れていないとき
+	if (CheckSoundMem(PlayBGM.handle) == 0)
+	{
+		//BGMを流す
+		PlaySoundMem(PlayBGM.handle, PlayBGM.playType);
+	}
+
 	//プレイヤーの操作
 	if (KeyDown(KEY_INPUT_W) == TRUE)
 	{
@@ -432,6 +542,9 @@ VOID PlayProc(VOID)
 	{
 		//エンド画面に切り替え
 		ChangeScene(GAME_SCENE_END);
+
+		//BGMを止める
+		StopSoundMem(PlayBGM.handle);
 
 		//処理を強制終了
 		return;
@@ -507,8 +620,18 @@ VOID End(VOID)
 /// </summary>
 VOID EndProc(VOID)
 {
+	//BGMが流れていないとき
+	if (CheckSoundMem(EndBGM.handle) == 0)
+	{
+		//BGMを流す
+		PlaySoundMem(EndBGM.handle, EndBGM.playType);
+	}
+
 	if (KeyClick(KEY_INPUT_RETURN) == TRUE)
 	{
+		//BGMを止める
+		StopSoundMem(EndBGM.handle);
+
 		//シーン切り替え
 		//次のシーンの初期化をここで行うと楽
 
