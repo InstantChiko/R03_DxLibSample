@@ -68,6 +68,9 @@ AUDIO TitleBGM;
 AUDIO PlayBGM;
 AUDIO EndBGM;
 
+//効果音
+AUDIO PlayerSE;
+
 //画面の切り替え
 BOOL IsFadeOut = FALSE;		//フェードアウト
 BOOL IsFadeIn = FALSE;		//フェードイン
@@ -223,10 +226,13 @@ int WINAPI WinMain(
 	DeleteGraph(player.handle);		//画像をメモリ上から削除
 	DeleteGraph(Goal.handle);		//画像をメモリ上から削除
 
-		//終わるときの処理
-	DeleteSoundMem(TitleBGM.handle);	//動画をメモリ上から削除
-	DeleteSoundMem(PlayBGM.handle);		//画像をメモリ上から削除
-	DeleteSoundMem(EndBGM.handle);		//画像をメモリ上から削除
+	//終わるときの処理
+	DeleteSoundMem(TitleBGM.handle);	//音楽をメモリ上から削除
+	DeleteSoundMem(PlayBGM.handle);		//音楽をメモリ上から削除
+	DeleteSoundMem(EndBGM.handle);		//音楽をメモリ上から削除
+
+
+	DeleteSoundMem(PlayerSE.handle);		//SEをメモリ上から削除
 
 	//ＤＸライブラリ使用の終了処理
 	DxLib_End();
@@ -338,7 +344,6 @@ BOOL GameLoad(VOID)
 		TitleBGM.playType = DX_PLAYTYPE_LOOP;	 //音楽をループさせる
 		TitleBGM.Volume = 255;					 //MAXが２５５
 
-		return TRUE;	//全て読み込みた！
 	
 
 		//play音楽の読み込み
@@ -360,7 +365,6 @@ BOOL GameLoad(VOID)
 		PlayBGM.playType = DX_PLAYTYPE_LOOP;	 //音楽をループさせる
 		PlayBGM.Volume = 255;					 //MAXが２５５
 
-		return TRUE;	//全て読み込みた！
 
 
 	//end音楽の読み込み
@@ -381,6 +385,25 @@ BOOL GameLoad(VOID)
 
 	EndBGM.playType = DX_PLAYTYPE_LOOP;	 //音楽をループさせる
 	EndBGM.Volume = 255;					 //MAXが２５５
+
+		//効果音の読み込み
+	strcpyDx(PlayerSE.path, ".\\Audio\\Finger.mp3");	//パスのコピー
+	PlayerSE.handle = LoadSoundMem(PlayerSE.path);	//音楽の読み込み
+
+	if (PlayerSE.handle == -1)
+	{
+		MessageBox(
+			GetMainWindowHandle(),	//メインのウィンドウハンドル
+			PlayerSE.path,				//メッセージ本文
+			"音楽読み込みエラー！",		//メッセージタイトル
+			MB_OK					//ボタン
+		);
+
+		return FALSE;	//読み込み失敗
+	}
+
+	PlayerSE.playType = DX_PLAYTYPE_BACK;	 //音楽をループさせる
+	PlayerSE.Volume = 255;					 //MAXが２５５
 
 	return TRUE;	//全て読み込みた！
 }
@@ -516,19 +539,43 @@ VOID PlayProc(VOID)
 	if (KeyDown(KEY_INPUT_W) == TRUE)
 	{
 		player.y -= player.speed * fps.DeltaTime;
+
+		//動くときの効果音を追加
+		if (CheckSoundMem(PlayerSE.handle) == 0)
+		{
+			PlaySoundMem(PlayerSE.handle, PlayerSE.playType);
+		}
 	}
 	if (KeyDown(KEY_INPUT_S) == TRUE)
 	{
 		player.y += player.speed * fps.DeltaTime;
+
+		//動くときの効果音を追加
+		if (CheckSoundMem(PlayerSE.handle) == 0)
+		{
+			PlaySoundMem(PlayerSE.handle, PlayerSE.playType);
+		}
 	}
 
 	if (KeyDown(KEY_INPUT_A) == TRUE)
 	{
 		player.x -= player.speed * fps.DeltaTime;
+
+		//動くときの効果音を追加
+		if (CheckSoundMem(PlayerSE.handle) == 0)
+		{
+			PlaySoundMem(PlayerSE.handle, PlayerSE.playType);
+		}
 	}
 	if (KeyDown(KEY_INPUT_D) == TRUE)
 	{
 		player.x += player.speed * fps.DeltaTime;
+
+		//動くときの効果音を追加
+		if (CheckSoundMem(PlayerSE.handle) == 0)
+		{
+			PlaySoundMem(PlayerSE.handle, PlayerSE.playType);
+		}
 	}
 
 	//当たり判定を更新する
