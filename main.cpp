@@ -80,7 +80,7 @@ CHARACTOR Goal;
 //画像を読み込む
 IMAGE TitleLogo;
 IMAGE TitleEnter;
-IMAGE TitleClear;
+IMAGE EndClear;
 
 
 //音楽
@@ -107,6 +107,11 @@ int fadeOutCntMax = fadeTimeMax;	//フェードアウトのカウンタMAX
 int fadeInCntInit = fadeTimeMax;	//初期値
 int fadeInCnt = fadeInCntInit;		//フェードアウトのカウンタ
 int fadeInCntMax = fadeTimeMax;		//フェードアウトのカウンタMAX
+
+//PushEnterも点滅
+int PushEnterCnt = 0;
+const int PushEnterCntMax = 30;
+BOOL PushEnterBrink = FALSE;
 
 //プロトタイプ宣言
 VOID Title(VOID);		//タイトル画面
@@ -135,6 +140,7 @@ BOOL OnCollRect(RECT a, RECT b);			//矩形と矩形の当たり判定
 BOOL GameLoad(VOID);	//ゲームのデータを読み込み
 
 BOOL LoadGraph(IMAGE* image, const char* path);
+
 VOID GameInit(VOID);	//ゲームのデータの初期化
 
 // プログラムは WinMain から始まります
@@ -258,7 +264,7 @@ int WINAPI WinMain(
 
 	DeleteGraph(TitleLogo.handle);		  //画像をメモリ上から削除
 	DeleteGraph(TitleEnter.handle);		  //画像をメモリ上から削除
-	DeleteGraph(TitleClear.handle);		  //画像をメモリ上から削除
+	DeleteGraph(EndClear.handle);		  //画像をメモリ上から削除
 										
 	//ＤＸライブラリ使用の終了処理
 	DxLib_End();
@@ -294,6 +300,8 @@ BOOL GameLoad(VOID)
 
 	//動画のボリューム
 	playMovie.Volume = 255;
+
+
 
 
 
@@ -341,12 +349,12 @@ BOOL GameLoad(VOID)
 		return FALSE;	//読み込み失敗
 	}
 
-	
+
 
 	//画像の幅と高さを取得
 	GetGraphSize(Goal.img.handle, &Goal.img.width, &Goal.img.height);
 
-	
+
 
 
 	/// <summary>
@@ -359,48 +367,48 @@ BOOL GameLoad(VOID)
 	/// <returns></returns>
 
 		//title音楽の読み込み
-		strcpyDx(TitleBGM.path, ".\\Audio\\opening.mp3");	//パスのコピー
-		TitleBGM.handle = LoadSoundMem(TitleBGM.path);	//音楽の読み込み
+	strcpyDx(TitleBGM.path, ".\\Audio\\opening.mp3");	//パスのコピー
+	TitleBGM.handle = LoadSoundMem(TitleBGM.path);	//音楽の読み込み
 
-		if (TitleBGM.handle == -1)
-		{
-			MessageBox(
-				GetMainWindowHandle(),	//メインのウィンドウハンドル
-				TitleBGM.path,				//メッセージ本文
-				"音楽読み込みエラー！",		//メッセージタイトル
-				MB_OK					//ボタン
-			);
+	if (TitleBGM.handle == -1)
+	{
+		MessageBox(
+			GetMainWindowHandle(),	//メインのウィンドウハンドル
+			TitleBGM.path,				//メッセージ本文
+			"音楽読み込みエラー！",		//メッセージタイトル
+			MB_OK					//ボタン
+		);
 
-			return FALSE;	//読み込み失敗
-		}
+		return FALSE;	//読み込み失敗
+	}
 
-		TitleBGM.playType = DX_PLAYTYPE_LOOP;	 //音楽をループさせる
-		TitleBGM.Volume = 255;					 //MAXが２５５
-
-	
-
-		//play音楽の読み込み
-		strcpyDx(PlayBGM.path, ".\\Audio\\plaing.mp3");	//パスのコピー
-		PlayBGM.handle = LoadSoundMem(PlayBGM.path);	//音楽の読み込み
-
-		if (PlayBGM.handle == -1)
-		{
-			MessageBox(
-				GetMainWindowHandle(),	//メインのウィンドウハンドル
-				PlayBGM.path,				//メッセージ本文
-				"音楽読み込みエラー！",		//メッセージタイトル
-				MB_OK					//ボタン
-			);
-
-			return FALSE;	//読み込み失敗
-		}
-
-		PlayBGM.playType = DX_PLAYTYPE_LOOP;	 //音楽をループさせる
-		PlayBGM.Volume = 255;					 //MAXが２５５
+	TitleBGM.playType = DX_PLAYTYPE_LOOP;	 //音楽をループさせる
+	TitleBGM.Volume = 255;					 //MAXが２５５
 
 
 
-	//end音楽の読み込み
+	//play音楽の読み込み
+	strcpyDx(PlayBGM.path, ".\\Audio\\plaing.mp3");	//パスのコピー
+	PlayBGM.handle = LoadSoundMem(PlayBGM.path);	//音楽の読み込み
+
+	if (PlayBGM.handle == -1)
+	{
+		MessageBox(
+			GetMainWindowHandle(),	//メインのウィンドウハンドル
+			PlayBGM.path,				//メッセージ本文
+			"音楽読み込みエラー！",		//メッセージタイトル
+			MB_OK					//ボタン
+		);
+
+		return FALSE;	//読み込み失敗
+	}
+
+	PlayBGM.playType = DX_PLAYTYPE_LOOP;	 //音楽をループさせる
+	PlayBGM.Volume = 255;					 //MAXが２５５
+
+
+
+//end音楽の読み込み
 	strcpyDx(EndBGM.path, ".\\Audio\\ending.mp3");	//パスのコピー
 	EndBGM.handle = LoadSoundMem(EndBGM.path);	//音楽の読み込み
 
@@ -438,32 +446,42 @@ BOOL GameLoad(VOID)
 	PlayerSE.playType = DX_PLAYTYPE_BACK;	 //音楽をループさせる
 	PlayerSE.Volume = 255;					 //MAXが２５５
 
-	return TRUE;	//全て読み込みた！
-}
-
-BOOL LoadGraph(IMAGE* image, const char* path)
-{
-	//title音楽の読み込み
-	strcpyDx(image->path, path);	//パスのコピー
-	image->handle = LoadGraph(image->path);	//画像の読み込み]
+		//titleLogoの読み込み
+	strcpyDx(TitleLogo.path, ".\\image\\Title.png");	//パスのコピー
+	TitleLogo.handle = LoadGraph(TitleLogo.path);	//画像の読み込み]
 
 	//画像が読み込めなかったときは、エラー(-1)が入る
-	if (image->handle == -1)
+	if (TitleLogo.handle == -1)
 	{
 		MessageBox(
 			GetMainWindowHandle(),	//メインのウィンドウハンドル
-			image->path,				//メッセージ本文
+			TitleLogo.path,				//メッセージ本文
 			"画像読み込みエラー！",		//メッセージタイトル
 			MB_OK					//ボタン
 		);
 
-		return FALSE;	//読み込み失敗
+		//titleLogoの読み込み
+		strcpyDx(TitleEnter.path, ".\\image\\Title.png");	//パスのコピー
+		TitleEnter.handle = LoadGraph(TitleEnter.path);	//画像の読み込み]
+
+		//画像が読み込めなかったときは、エラー(-1)が入る
+		if (TitleEnter.handle == -1)
+		{
+			MessageBox(
+				GetMainWindowHandle(),	//メインのウィンドウハンドル
+				TitleEnter.path,				//メッセージ本文
+				"画像読み込みエラー！",		//メッセージタイトル
+				MB_OK					//ボタン
+			);
+
+			return FALSE;	//読み込み失敗
+		}
 	}
 	//画像の幅と高さを取得
 	GetGraphSize(Goal.img.handle, &Goal.img.width, &Goal.img.height);
-
-	return TRUE;
+	return TRUE;	//全て読み込みた！
 }
+
 
 /// <summary>
 /// ゲームデータを初期化
@@ -488,6 +506,17 @@ VOID GameInit(VOID)
 
 	//当たり判定を更新する
 	CollUpdate(&Goal);	//プレイヤーの当たり判定のアドレス
+
+	//タイトルロゴの位置を決める
+	TitleLogo.x = GAME_WIDTH / 2 - TitleLogo.width / 2;		//中央揃え
+
+	//pushEnterの位置を決める
+	TitleEnter.x = GAME_WIDTH / 2 - TitleEnter.width / 2;		//中央揃え
+	TitleEnter.y = GAME_HEIGHT - TitleEnter.height - 100;	
+
+	//クリアロゴの位置を決める
+	EndClear.x = GAME_WIDTH / 2 - EndClear.width / 2;		//中央揃え
+	EndClear.y = GAME_WIDTH / 2 - EndClear.height / 2;		//中央揃え
 }
 
 /// <summary>
@@ -552,7 +581,21 @@ VOID TitleProc(VOID)
 /// </summary>
 VOID TitleDraw(VOID)
 {
+	//タイトルロゴの描画
+	DrawGraph(TitleLogo.x, TitleLogo.y, TitleLogo.handle, TRUE);
 
+	//PushEnterを点滅
+	if (PushEnterBrink == TRUE)
+	{
+		//半透明にする
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, ((float)PushEnterCnt / PushEnterCntMax));
+	
+		//PushEnterの描画	
+		DrawGraph(TitleEnter.x, TitleEnter.y, TitleEnter.handle, TRUE);
+
+		//半透明終了
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	}
 	DrawString(0, 0, "タイトル画面", GetColor(0, 0, 0));
 	return;
 }
@@ -750,6 +793,9 @@ VOID EndProc(VOID)
 /// </summary>
 VOID EndDraw(VOID)
 {
+	//ENDCLEARの描画
+	DrawGraph(EndClear.x, EndClear.y, EndClear.handle, TRUE);
+
 	DrawString(0, 0, "エンド画面", GetColor(0, 0, 0));
 	return;
 }
