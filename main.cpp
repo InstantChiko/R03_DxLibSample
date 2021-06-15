@@ -87,6 +87,7 @@ IMAGE EndClear;
 AUDIO TitleBGM;
 AUDIO PlayBGM;
 AUDIO EndBGM;
+AUDIO Himei;
 
 //効果音
 AUDIO PlayerSE;
@@ -110,8 +111,14 @@ int fadeInCntMax = fadeTimeMax;		//フェードアウトのカウンタMAX
 
 //PushEnterも点滅
 int PushEnterCnt = 0;
-const int PushEnterCntMax = 30;
+const int PushEnterCntMax = 60;
 BOOL PushEnterBrink = FALSE;
+
+//Himeiのカウント
+int HimeiCnt = 0;
+const int HimeiCntMax =0;
+BOOL HimeiBrink = FALSE;
+
 
 //プロトタイプ宣言
 VOID Title(VOID);		//タイトル画面
@@ -265,6 +272,7 @@ int WINAPI WinMain(
 	DeleteGraph(TitleLogo.handle);		  //画像をメモリ上から削除
 	DeleteGraph(TitleEnter.handle);		  //画像をメモリ上から削除
 	DeleteGraph(EndClear.handle);		  //画像をメモリ上から削除
+	DeleteGraph(Himei.handle);			  //画像をメモリ上から削除
 										
 	//ＤＸライブラリ使用の終了処理
 	DxLib_End();
@@ -408,7 +416,7 @@ BOOL GameLoad(VOID)
 
 
 
-//end音楽の読み込み
+	//end音楽の読み込み
 	strcpyDx(EndBGM.path, ".\\Audio\\ending.mp3");	//パスのコピー
 	EndBGM.handle = LoadSoundMem(EndBGM.path);	//音楽の読み込み
 
@@ -446,6 +454,26 @@ BOOL GameLoad(VOID)
 	PlayerSE.playType = DX_PLAYTYPE_BACK;	 //音楽をループさせる
 	PlayerSE.Volume = 255;					 //MAXが２５５
 
+	//効果音の読み込み
+	strcpyDx(Himei.path, ".\\Audio\\himei.mp3");	//パスのコピー
+	Himei.handle = LoadSoundMem(Himei.path);	//音楽の読み込み
+
+	if (Himei.handle == -1)
+	{
+		MessageBox(
+			GetMainWindowHandle(),	//メインのウィンドウハンドル
+			Himei.path,				//メッセージ本文
+			"音楽読み込みエラー！",		//メッセージタイトル
+			MB_OK					//ボタン
+		);
+
+		return FALSE;	//読み込み失敗
+	}
+
+	Himei.playType = DX_PLAYTYPE_NORMAL;	 //音楽
+	Himei.Volume = 255;					 //MAXが２５５
+
+
 		//titleLogoの読み込み
 	strcpyDx(TitleLogo.path, ".\\image\\Title.png");	//パスのコピー
 	TitleLogo.handle = LoadGraph(TitleLogo.path);	//画像の読み込み]
@@ -459,9 +487,15 @@ BOOL GameLoad(VOID)
 			"画像読み込みエラー！",		//メッセージタイトル
 			MB_OK					//ボタン
 		);
+		return FALSE;
+		
+	}
+		//画像の幅と高さを取得
+		GetGraphSize(TitleLogo.handle, &TitleLogo.width, &TitleLogo.height);
 
-		//titleLogoの読み込み
-		strcpyDx(TitleEnter.path, ".\\image\\Title.png");	//パスのコピー
+
+		//titleEnterの読み込み
+		strcpyDx(TitleEnter.path, ".\\image\\Enter.png");	//パスのコピー
 		TitleEnter.handle = LoadGraph(TitleEnter.path);	//画像の読み込み]
 
 		//画像が読み込めなかったときは、エラー(-1)が入る
@@ -473,12 +507,30 @@ BOOL GameLoad(VOID)
 				"画像読み込みエラー！",		//メッセージタイトル
 				MB_OK					//ボタン
 			);
-
 			return FALSE;	//読み込み失敗
 		}
-	}
+	
 	//画像の幅と高さを取得
-	GetGraphSize(Goal.img.handle, &Goal.img.width, &Goal.img.height);
+	GetGraphSize(TitleEnter.handle, &TitleEnter.width, &TitleEnter.height);
+
+	//EndClearの読み込み
+	strcpyDx(EndClear.path, ".\\image\\End.png");	//パスのコピー
+	EndClear.handle = LoadGraph(EndClear.path);	//画像の読み込み]
+
+	//画像が読み込めなかったときは、エラー(-1)が入る
+	if (EndClear.handle == -1)
+	{
+		MessageBox(
+			GetMainWindowHandle(),	//メインのウィンドウハンドル
+			EndClear.path,				//メッセージ本文
+			"画像読み込みエラー！",		//メッセージタイトル
+			MB_OK					//ボタン
+		);
+		return FALSE;	//読み込み失敗
+	}
+
+	//画像の幅と高さを取得
+	GetGraphSize(EndClear.handle, &EndClear.width, &EndClear.height);
 	return TRUE;	//全て読み込みた！
 }
 
@@ -508,15 +560,16 @@ VOID GameInit(VOID)
 	CollUpdate(&Goal);	//プレイヤーの当たり判定のアドレス
 
 	//タイトルロゴの位置を決める
-	TitleLogo.x = GAME_WIDTH / 2 - TitleLogo.width / 2;		//中央揃え
+	TitleLogo.x = 100;		//中央揃え
+	TitleLogo.y = 100;		//中央揃え
 
 	//pushEnterの位置を決める
 	TitleEnter.x = GAME_WIDTH / 2 - TitleEnter.width / 2;		//中央揃え
-	TitleEnter.y = GAME_HEIGHT - TitleEnter.height - 100;	
+	TitleEnter.y = GAME_HEIGHT / 2 + 200 - TitleEnter.height;	
 
 	//クリアロゴの位置を決める
 	EndClear.x = GAME_WIDTH / 2 - EndClear.width / 2;		//中央揃え
-	EndClear.y = GAME_WIDTH / 2 - EndClear.height / 2;		//中央揃え
+	EndClear.y = GAME_HEIGHT / 2 - EndClear.height / 2;		//中央揃え
 }
 
 /// <summary>
@@ -584,18 +637,38 @@ VOID TitleDraw(VOID)
 	//タイトルロゴの描画
 	DrawGraph(TitleLogo.x, TitleLogo.y, TitleLogo.handle, TRUE);
 
-	//PushEnterを点滅
-	if (PushEnterBrink == TRUE)
-	{
-		//半透明にする
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, ((float)PushEnterCnt / PushEnterCntMax));
-	
-		//PushEnterの描画	
-		DrawGraph(TitleEnter.x, TitleEnter.y, TitleEnter.handle, TRUE);
+		//MAX値まで待つ
+		if (PushEnterCnt < PushEnterCntMax) { PushEnterCnt++; }
+		else
+		{
+			if (PushEnterBrink == TRUE)PushEnterBrink = FALSE;
+			else if (PushEnterBrink == FALSE)PushEnterBrink = TRUE;
 
-		//半透明終了
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	}
+			PushEnterCnt = 0;	//カウンタを初期化
+		}
+
+		if (PushEnterBrink == TRUE)
+		{
+			//半透明にする
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, ((float)PushEnterCnt / PushEnterCntMax) * 255);
+
+			//PushEnterの描画
+			DrawGraph(TitleEnter.x, TitleEnter.y, TitleEnter.handle, TRUE);
+
+			//半透明終了
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+		}
+		if (PushEnterBrink == FALSE)
+		{
+			//半透明にする
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, ((float)(PushEnterCntMax - PushEnterCnt) / PushEnterCntMax) * 255);
+
+			//PushEnterの描画
+			DrawGraph(TitleEnter.x, TitleEnter.y, TitleEnter.handle, TRUE);
+
+			//半透明終了
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+		}
 	DrawString(0, 0, "タイトル画面", GetColor(0, 0, 0));
 	return;
 }
@@ -686,11 +759,29 @@ VOID PlayProc(VOID)
 	//プレイヤーがゴールに当たったときは
 	if (OnCollRect(player.coll, Goal.coll) == TRUE)
 	{
-		//エンド画面に切り替え
-		ChangeScene(GAME_SCENE_END);
+
+
+
+		//BGMが流れていないとき
+		if (CheckSoundMem(Himei.handle) == 0)
+		{
+			//BGMを流す
+			PlaySoundMem(Himei.handle, Himei.playType);
+		}
 
 		//BGMを止める
 		StopSoundMem(PlayBGM.handle);
+
+		//MAX値まで待つ
+		
+
+		//BGMを止める
+		StopSoundMem(Himei.handle);
+
+
+
+		//エンド画面に切り替え
+		ChangeScene(GAME_SCENE_END);
 
 		//処理を強制終了
 		return;

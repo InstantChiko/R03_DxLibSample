@@ -8,7 +8,7 @@
 
 //マクロ定義
 #define GAME_TITLE	"ゲームタイトル"	//ゲームタイトル（ゲームタイトル）
-#define GAME_WIDTH	1366				//ゲーム画面の幅（ウィドス）
+#define GAME_WIDTH	1280				//ゲーム画面の幅（ウィドス）
 #define GAME_HEIGHT	720					//ゲーム画面の高さ（ハイト）
 #define GAME_COLOR	32					//ゲームの色域
 
